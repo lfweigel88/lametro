@@ -40,7 +40,6 @@ $("mapid").load('maps.html')
 	}).addTo(mymap);
   var trains = L.layerGroup();
   var buses = L.layerGroup();
-  var buses2 = L.layerGroup();
   function plot()
   {
     $.getJSON('https://api.metro.net/agencies/lametro-rail/vehicles/', function(data) {
@@ -112,18 +111,8 @@ $("mapid").load('maps.html')
   
   }
 
-  function plot2() {
-    $.getJSON('https://api.metro.net/agencies/lametro/vehicles', function(data) {
-      $(data.items).each(function(index,value){
-        var bus2 = L.circle([value.latitude, value.longitude], 100).bindPopup("Vehicle " + value.id).addTo(buses2);
-      });
-      console.log(value.id);
-      /*buses2.addTo(mymap);*/
-    });
-  }
-                    
+                  
     plot();
-    plot2();
     setInterval(function(){
       mymap.removeLayer(trains);
       mymap.removeLayer(buses);

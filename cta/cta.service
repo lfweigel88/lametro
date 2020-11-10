@@ -1,0 +1,14 @@
+[Unit]
+Description=CTA/Metra Data Pull
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=pi
+ExecStart=/usr/bin/python3 /home/pi/cta/index.py > /home/pi/cta/cta.log 2>&1
+
+[Install]
+WantedBy=multi-user.target

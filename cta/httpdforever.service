@@ -1,0 +1,14 @@
+[Unit]
+Description=CTA/Metra HTTP Server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/python2 /home/pi/cta/httpforever.py > /home/pi/cta/httpdforever.log 2>&1
+
+[Install]
+WantedBy=multi-user.target

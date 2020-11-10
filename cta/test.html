@@ -1,0 +1,161 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        /* configure the size of the map */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+        $(document).ready(function(){
+      setInterval(function(){
+      $("mapid").load('osmtest.html')
+      }, 2000);
+      });
+        </script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      // initialize Leaflet
+      // [33.98, -118.2], 10.5
+      var map = L.map('map').setView({lon: -87.8165, lat: 41.8734}, 11);
+
+      // add the OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+      }).addTo(map);
+      var trains = L.layerGroup();
+  var buses = L.layerGroup();
+  function plot()
+  {
+    $.getJSON('http://192.168.42.109/metra.json', function(data) {
+                        console.log(data)
+                        $(data).each(function(index,value){
+                            /*mymap.eachLayer(function(layer){
+                              console.log(layer);*/
+                            console.log(value.vehicle.trip.route_id)
+                            if (value.vehicle.trip.route_id == 'UP-NW'){
+                                var routeColor = '#803d0a'
+                            }
+                            else if (value.vehicle.trip.route_id == 'UP-N'){
+                                var routeColor = '#145A32'
+                            }
+                            else if (value.vehicle.trip.route_id == 'SWS'){
+                                var routeColor = '#4287f5'
+                            }
+                            else if (value.vehicle.trip.route_id == 'RI'){
+                                var routeColor = '#fc0000'
+                            }
+                            else if (value.vehicle.trip.route_id == 'NCS'){
+                                var routeColor = '#8f00fc'
+                            }
+                            else if (value.vehicle.trip.route_id == 'MD-N'){
+                                var routeColor = '#fc9300'
+                            }
+                            else if (value.vehicle.trip.route_id == 'HC'){
+                                var routeColor = '#2d006b'
+                            }
+                            else if (value.vehicle.trip.route_id == 'ME'){
+                                var routeColor = '#ff9500'
+                            }
+                            else if (value.vehicle.trip.route_id == 'BNSF'){
+                                var routeColor = '#00e390'
+                            }
+                            else if (value.vehicle.trip.route_id == 'UP-W'){
+                                var routeColor = '#e3c60b'
+                            }
+                            else if (value.vehicle.trip.route_id == 'MD-W'){
+                                var routeColor = '#ff63f2'
+                            }
+                            else {
+                                var routeColor = 'yellow'
+                            }
+                            var msg = value.vehicle.trip.trip_id
+                            var train = L.circle([value.vehicle.position.latitude, value.vehicle.position.longitude], 600, {
+		                    color: '#3252a8',
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.8
+	                    }).bindPopup(msg + " " + value.vehicle.timestamp.low.split("T")[1].split(".")[0]).addTo(trains);
+                      
+                            /*L.trains.addTo(mymap);*/
+                            /*L.circle([value.latitude, value.longitude], 200, {
+		                    color: routeColor,
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.5
+	                    }).addTo(mymap).bindPopup("Vehicle " + value.id);*/
+                        });
+                        /*console.log(trains);*/
+                        console.log(trains);
+                        trains.addTo(map);
+
+                        }
+                    );
+                    
+        var xmlHttp = new XMLHttpRequest;
+      xmlHttp.open("GET", 'http://192.168.42.109/cta.json', false);
+      xmlHttp.send( null );
+      testcase = xmlHttp.responseText.toString()
+      testcase = JSON.parse(testcase)
+      for (var key in testcase) {
+        if (key == 'G') {
+            routeColor = 'green'
+        }
+        else if (key == 'blue'){
+            routeColor = 'blue'
+        }
+        else if (key == 'red'){
+            routeColor = 'red'
+        }
+        else if (key == 'brn'){
+            routeColor = 'brown'
+        }
+        else if (key == 'org'){
+            routeColor = 'orange'
+        }
+        else if (key == 'p'){
+            routeColor = 'purple'
+        }
+        else if (key == 'pink'){
+            routeColor = 'pink'
+        }
+        else {
+            routeColor = 'black'
+        }
+          for (var key2 in testcase[key]) {
+              msg = testcase[key][key2]['rn'] + " -> " + testcase[key][key2]['destNm'] + ": "+ testcase[key][key2]['nextStaNm'] + " at " + testcase[key][key2]['arrT'].split('T')[1]
+              var train = L.circle([testcase[key][key2]['lat'], testcase[key][key2]['lon']], 400, {
+		            color: 'black',
+		            fillColor: routeColor,
+		            fillOpacity: 0.8
+	            }).bindPopup(msg).addTo(trains);
+          }
+      }
+  
+}
+                  
+    plot();
+    setInterval(function(){
+      map.removeLayer(trains);
+      map.removeLayer(buses);
+      trains.clearLayers();
+      buses.clearLayers();
+      plot();
+    },10000);
+      // show the scale bar on the lower left corner
+      L.control.scale().addTo(map);
+
+    </script>
+  </body>
+</html>

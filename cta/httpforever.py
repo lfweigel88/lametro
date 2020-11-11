@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 import SimpleHTTPServer
+from ctavars import homedir
 class CORSHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def send_head(self):
         """Common code for GET and HEAD commands.
@@ -9,7 +10,7 @@ class CORSHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         and must be closed by the caller under all circumstances), or
         None, in which case the caller has nothing further to do.
         """
-        path = '/home/pi/cta/'
+        path = homedir
         f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):

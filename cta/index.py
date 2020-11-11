@@ -3,6 +3,7 @@ import time
 import requests
 import os
 import json
+from ctavars import homedir
 while(True):
     ctajson = {}
     for i in ["blue", "red", "G", "brn", "org", "p", "pink"]:
@@ -20,11 +21,11 @@ while(True):
     ctajson = str(ctajson).replace('None','\'None\'')
     ctajson = str(ctajson).replace('O\'Hare','OHare')
     ctajson = str(ctajson).replace('\'','\"')
-    myjson2 = open('/home/pi/cta/cta.json','w')
+    myjson2 = open(homedir + 'cta.json','w')
     myjson2.write(ctajson)
     myjson2.close()
     data = requests.get('https://gtfsapi.metrarail.com/gtfs/positions',auth=('b3bde87cd47fd08de2fae05d87816519','69cae6d7a74d5b246e2577fdc0c9dbd9'))
-    myjson = open('/home/pi/cta/metra.json','w')
+    myjson = open(homedir + 'metra.json','w')
     myjson.write(json.dumps(data.json()))
     myjson.close()
     time.sleep(15)

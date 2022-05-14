@@ -1,0 +1,131 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        /* configure the size of the map */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+        $(document).ready(function(){
+      setInterval(function(){
+      $("mapid").load('osmtest.html')
+      }, 2000);
+      });
+        </script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      // initialize Leaflet
+      // [33.98, -118.2], 10.5
+      var map = L.map('map').setView({lon: -118.2, lat: 33.98}, 10);
+
+      // add the OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+      }).addTo(map);
+      var trains = L.layerGroup();
+  var buses = L.layerGroup();
+  function plot()
+  {
+    $.getJSON('https://api.metro.net/agencies/lametro-rail/vehicles/', function(data) {
+                        $(data.items).each(function(index,value){
+                            if (value.route_id == '801'){
+                                var routeColor = 'blue';
+                            }
+                            else if (value.route_id == '802'){
+                                var routeColor = 'red';
+                            }
+                            else if (value.route_id == '803'){
+                                var routeColor = 'green';
+                            }
+                            else if (value.route_id == '804'){
+                                var routeColor = 'gold';
+                            }
+                            else if (value.route_id == '805'){
+                                var routeColor = 'purple';
+                            }
+                            else if (value.route_id == '806'){
+                                var routeColor = '#2ECCFA';
+                            }
+                            /*mymap.eachLayer(function(layer){
+                              console.log(layer);*/
+                            var train = L.circle([value.latitude, value.longitude], 400, {
+		                    color: routeColor,
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.8
+	                    }).bindPopup("Vehicle " + value.id).addTo(trains);
+                      
+                            /*L.trains.addTo(mymap);*/
+                            /*L.circle([value.latitude, value.longitude], 200, {
+		                    color: routeColor,
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.5
+	                    }).addTo(mymap).bindPopup("Vehicle " + value.id);*/
+                        });
+                        /*console.log(trains);*/
+                        trains.addTo(map);
+
+                        }
+                    );
+  
+    /*$.getJSON('https://api.metro.net/agencies/lametro/vehicles/', function(data) {
+      $(data.items).each(function(index,value){
+          /*var bus = L.circle([value.latitude, value.longitude], 100.bindPopup("Vehicle " + value.id).addTo(trains);
+          trains.addTo(mymap);
+          console.log(value.id);
+      });}*/
+    const arr = ['901','910','950'];
+    for (let b of arr){
+    $.getJSON('https://api.metro.net/agencies/lametro/routes/'+b+'/vehicles/', function(data) {
+      $(data.items).each(function(index,value){
+        if (value.route_id == '901'){
+          var routeColor = 'orange'
+        }
+        else {
+          var routeColor = '#7b7c7a'
+        }
+        var bus = L.circle([value.latitude, value.longitude], 400, {
+          color: routeColor,
+          fillColor: routeColor,
+          fillOpacity: 0.5,      
+          }).bindPopup("Vehicle " + value.id + " on route " + value.route_id).addTo(buses);
+      });
+      buses.addTo(map);
+      });
+    }
+  
+  }
+
+                  
+    plot();
+    setInterval(function(){
+      map.removeLayer(trains);
+      map.removeLayer(buses);
+      trains.clearLayers();
+      buses.clearLayers();
+      plot();
+      /*mymap.removeLayer(buses);
+      buses.clearLayers();
+      plot2();*/
+    },10000);
+      // show the scale bar on the lower left corner
+      L.control.scale().addTo(map);
+
+      // show a marker on the map
+      // L.marker({lon: 0, lat: 0}).bindPopup('The center of the world').addTo(map);
+    </script>
+  </body>
+</html>

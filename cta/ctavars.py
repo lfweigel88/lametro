@@ -1,3 +1,3 @@
 ##Vars
 ##Fill in root directory here
-homedir = ""
+homedir = "/var/www/html/lametro/cta/"

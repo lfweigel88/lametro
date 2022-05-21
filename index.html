@@ -1,0 +1,118 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        /* configure the size of the map */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous">
+        $(document).ready(function(){
+      setInterval(function(){
+      $("mapid").load('test.html')
+      }, 2000);
+      });
+        </script>
+    <script>
+      // initialize Leaflet
+      // [33.98, -118.2], 10.5
+      var map = L.map('map').setView({lon: -118.2816, lat: 33.9482}, 10.5);
+
+      // add the OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+      }).addTo(map);
+      var trains = L.layerGroup();
+      var stops = L.layerGroup();
+  let lamRadius = 600
+  function stopPlot() {
+      var stopsHTTP = new XMLHttpRequest;
+      stopsHTTP.open("GET", "stops.json", false);
+      stopsHTTP.send( null );
+      stopsCase = stopsHTTP.responseText.toString();
+      stopsCase = JSON.parse(stopsCase)
+      for (var key in stopsCase) {
+        var stop = L.circle([stopsCase[key]['lat'], stopsCase[key]['long']], "200", {
+        color: 'black',
+        fillColor: 'black',
+        fillOpacity: 0.8
+        }).bindPopup(stopsCase[key]['id'] + ':' + stopsCase[key]['name']).addTo(stops);
+      }
+      stops.addTo(map);
+} 
+stopPlot(); 
+function plot() {
+      var xmlHttp2 = new XMLHttpRequest;
+      xmlHttp2.open("GET", 'lametro.json', false);
+      xmlHttp2.send( null );
+      testcase2 = xmlHttp2.responseText.toString()
+      testcase2 = JSON.parse(testcase2)
+      for (var key in testcase2){
+      if (testcase2[key]['route_id'] == '801'){
+        var routeColor = '#0072BC';
+      }
+      else if (testcase2[key]['route_id'] == '802'){
+          var routeColor = '#EB131B';
+      }
+      else if (testcase2[key]['route_id'] == '803'){
+          var routeColor = '#58A738';
+      }
+      else if (testcase2[key]['route_id'] == '804'){
+          var routeColor = '#FDB913';
+      }
+      else if (testcase2[key]['route_id'] == '805'){
+          var routeColor = '#A05DA5';
+      }
+      else if (testcase2[key]['route_id'] == '806'){
+          var routeColor = '#5BC2E7';
+      }
+      else{
+          var routeColor = 'black';
+      }
+      var train = L.circle([testcase2[key]['latitude'], testcase2[key]['longitude']], lamRadius, {
+                    color: 'black',
+                    fillColor: routeColor,
+                    fillOpacity: 0.8
+            }).bindPopup('Vehicle: ' + testcase2[key]['vehicle_id'] + ' - ' + testcase2[key]['status'] + '<br>' + 'Route: ' + testcase2[key]['route_id'] + '<br> Next Stop: ' + testcase2[key]['next_stop']).addTo(trains);
+          }
+      trains.addTo(map);
+        }
+    plot();
+    map.on('zoomend', function(){
+      var currentZoom = map.getZoom();
+      zoomDiff = currentZoom - 11;
+      if (zoomDiff > 3){
+        zoomDiff = 3
+      }
+      map.removeLayer(trains);
+      trains.clearLayers();
+      var startRadius = 400
+      var startRadius2 = 600
+      lamRadius = startRadius - (100 * zoomDiff)
+      plot();
+    })
+    setInterval(function(){
+      map.removeLayer(trains);
+      trains.clearLayers();
+      plot();
+    },30000);
+      L.control.scale().addTo(map);
+    </script>
+  </body>
+</html>

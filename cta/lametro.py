@@ -32,5 +32,5 @@ headers = {'Authorization': lamkey}
 response = requests.get('https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-vehicle-positions',headers=headers)
 feed.ParseFromString(response.content)
 for entity in feed.entity:
-	feeddict = feeddict + "{'"+entity.vehicle.trip.route_id+"': {'vehicle_id:' '"+entity.vehicle.vehicle.id+"', 'latitude': '" + str(entity.vehicle.position.latitude) +"', 'longitude': '" + str(entity.vehicle.position.longitude) +"',} }"
+	feeddict = feeddict + "{'"+entity.vehicle.trip.route_id+"': {'vehicle_id:' '"+entity.vehicle.vehicle.id+"', 'latitude': '" + str(entity.vehicle.position.latitude) +"', 'longitude': '" + str(entity.vehicle.position.longitude) +"', 'bearing': '" + str(entity.vehicle.position.bearing) +"'} }"
 print(feeddict)

@@ -29,19 +29,22 @@ from ctavars import lamkey
 feed = gtfs_realtime_pb2.FeedMessage()
 feeddict = {}
 headers = {'Authorization': lamkey}
-response = requests.get('https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-vehicle-positions',headers=headers)
-feed.ParseFromString(response.content)
-for entity in feed.entity:
-	if not entity.vehicle.trip.route_id:
-		continue
-	else:
-		feeddict[entity.vehicle.trip.route_id] = {}
-		feeddict[entity.vehicle.trip.route_id]['latitude'] = entity.vehicle.position.latitude
-		feeddict[entity.vehicle.trip.route_id]['longitude'] = entity.vehicle.position.longitude
-		feeddict[entity.vehicle.trip.route_id]['bearing'] = entity.vehicle.position.bearing
-		if entity.vehicle.current_status == 1:
-			feeddict[entity.vehicle.trip.route_id]['status'] = "STOPPED"
-		if entity.vehicle.current_status == 2:
-			feeddict[entity.vehicle.trip.route_id]['status'] = "IN TRANSIT"
-print(feeddict)
+while True:
+	response = requests.get('https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-vehicle-positions',headers=headers)
+	feed.ParseFromString(response.content)
+	for entity in feed.entity:
+		if not entity.vehicle.trip.route_id:
+			continue
+		else:
+			feeddict[entity.vehicle.trip.route_id] = {}
+			feeddict[entity.vehicle.trip.route_id]['latitude'] = entity.vehicle.position.latitude
+			feeddict[entity.vehicle.trip.route_id]['longitude'] = entity.vehicle.position.longitude
+			feeddict[entity.vehicle.trip.route_id]['bearing'] = entity.vehicle.position.bearing
+			if entity.vehicle.current_status == 1:
+				feeddict[entity.vehicle.trip.route_id]['status'] = "STOPPED"
+			if entity.vehicle.current_status == 2:
+				feeddict[entity.vehicle.trip.route_id]['status'] = "IN TRANSIT"
+	with open('lametro.json','w') as file:
+		file.write(json.dumps(feeddict))
+	time.sleep(15)
   		

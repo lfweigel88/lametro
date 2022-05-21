@@ -2,8 +2,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
     <style>
       html, body {
         height: 100%;
@@ -16,16 +16,18 @@
         height: 100%;
       }
     </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
-        $(document).ready(function(){
-      setInterval(function(){
-      $("mapid").load('osmtest.html')
-      }, 2000);
-      });
-        </script>
   </head>
   <body>
     <div id="map"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous">
+        $(document).ready(function(){
+      setInterval(function(){
+      $("mapid").load('test.html')
+      }, 2000);
+      });
+        </script>
     <script>
       // initialize Leaflet
       // [33.98, -118.2], 10.5
@@ -37,15 +39,97 @@
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
       }).addTo(map);
       var trains = L.layerGroup();
-  var buses = L.layerGroup();
+      var buses = L.layerGroup();
+      var stops = L.layerGroup();
+      $.getJSON('metrastops.json', function(data){
+
+      for (key in data){
+        var stop = L.circle([data[key]['stop_lat'], data[key]['stop_lon']], 50, {
+                    color: "#05872a",
+                    fillColor: "white",
+                    fillOpacity: 0.2
+                  }).bindPopup(data[key]['stop_url'].split('/')[5] + ": " +data[key]['stop_name'] + '/Zone ' + data[key]['zone_id']).addTo(stops);
+      }
+      stops.addTo(map)
+    }
+    )
+  /*console.log(stoparray)
+  console.log(stoparray.JSON[0])
+  console.log(array)
+  for (key in array){
+        var stop = L.circle(array[key]['stop_lat'], array[key]['stop_lon'], 200, {
+		                    color: "black",
+		                    fillColor: "black",
+		                    fillOpacity: 1.0
+	                    }).bindPopup(value.stop_name).addTo(stops);
+        }
+  stops.addTo(map);*/
+
+  let ctaRadius = 400
+  let metraRadius = 600
   function plot()
   {
-    $.getJSON('http://192.168.42.109/metra.json', function(data) {
-                        console.log(data)
+    /*$.getJSON('https://api.metro.net/agencies/lametro-rail/vehicles/', function(data) {
+                        $(data.items).each(function(index,value){
+                            if (value.route_id == '801'){
+                                var routeColor = 'blue';
+                            }
+                            else if (value.route_id == '802'){
+                                var routeColor = 'red';
+                            }
+                            else if (value.route_id == '803'){
+                                var routeColor = 'green';
+                            }
+                            else if (value.route_id == '804'){
+                                var routeColor = 'gold';
+                            }
+                            else if (value.route_id == '805'){
+                                var routeColor = 'purple';
+                            }
+                            else if (value.route_id == '806'){
+                                var routeColor = '#2ECCFA';
+                            }
+                            var train = L.circle([value.latitude, value.longitude], 400, {
+		                    color: routeColor,
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.8
+	                    }).bindPopup("Vehicle " + value.id).addTo(trains);
+                        });
+                        trains.addTo(map);
+
+                        }
+                    );
+  
+    $.getJSON('https://api.metro.net/agencies/lametro/vehicles/', function(data) {
+      $(data.items).each(function(index,value){
+          /*var bus = L.circle([value.latitude, value.longitude], 100.bindPopup("Vehicle " + value.id).addTo(trains);
+          trains.addTo(mymap);
+          console.log(value.id);
+      });}*/
+    /*const arr = ['901','910','950'];
+    for (let b of arr){
+    $.getJSON('https://api.metro.net/agencies/lametro/routes/'+b+'/vehicles/', function(data) {
+      $(data.items).each(function(index,value){
+        if (value.route_id == '901'){
+          var routeColor = 'orange'
+        }
+        else {
+          var routeColor = '#7b7c7a'
+        }
+        var bus = L.circle([value.latitude, value.longitude], 400, {
+          color: routeColor,
+          fillColor: routeColor,
+          fillOpacity: 0.5,      
+          }).bindPopup("Vehicle " + value.id + " on route " + value.route_id).addTo(buses);
+      });
+      buses.addTo(map);
+      });
+    }*/
+    $.getJSON('metra.json', function(data) {
                         $(data).each(function(index,value){
                             /*mymap.eachLayer(function(layer){
                               console.log(layer);*/
-                            console.log(value.vehicle.trip.route_id)
+                            console.log(metraRadius)
                             if (value.vehicle.trip.route_id == 'UP-NW'){
                                 var routeColor = '#803d0a'
                             }
@@ -83,28 +167,27 @@
                                 var routeColor = 'yellow'
                             }
                             var msg = value.vehicle.trip.trip_id
-                            var train = L.circle([value.vehicle.position.latitude, value.vehicle.position.longitude], 600, {
-                                    color: '#3252a8',
-                                    fillColor: routeColor,
-                                    fillOpacity: 0.8
-                            }).bindPopup(msg + " " + value.vehicle.timestamp.low.split("T")[1].split(".")[0]).addTo(trains);
-
+                            var train = L.circle([value.vehicle.position.latitude, value.vehicle.position.longitude], metraRadius, {
+		                    color: '#3252a8',
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.8
+	                    }).bindPopup(msg + " " + value.vehicle.timestamp.low.split("T")[1].split(".")[0]).addTo(trains);
+                      
                             /*L.trains.addTo(mymap);*/
                             /*L.circle([value.latitude, value.longitude], 200, {
-                                    color: routeColor,
-                                    fillColor: routeColor,
-                                    fillOpacity: 0.5
-                            }).addTo(mymap).bindPopup("Vehicle " + value.id);*/
+		                    color: routeColor,
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.5
+	                    }).addTo(mymap).bindPopup("Vehicle " + value.id);*/
                         });
                         /*console.log(trains);*/
-                        console.log(trains);
                         trains.addTo(map);
 
                         }
                     );
-
+                    
         var xmlHttp = new XMLHttpRequest;
-      xmlHttp.open("GET", 'http://192.168.42.109/cta.json', false);
+      xmlHttp.open("GET", 'cta.json', false);
       xmlHttp.send( null );
       testcase = xmlHttp.responseText.toString()
       testcase = JSON.parse(testcase)
@@ -134,40 +217,86 @@
             routeColor = 'black'
         }
           for (var key2 in testcase[key]) {
-              msg = testcase[key][key2]['rn'] + " to " + testcase[key][key2]['destNm'] + " arriving " + testcase[key][key2]['arrT'].split('T')[1]
-              var train = L.circle([testcase[key][key2]['lat'], testcase[key][key2]['lon']], 400, {
-                            color: 'black',
-                            fillColor: routeColor,
-                            fillOpacity: 0.8
-                    }).bindPopup(msg + " ").addTo(trains);
+              if (parseInt(testcase[key][key2]['heading']) > 0 && parseInt(testcase[key][key2]['heading']) < 10){
+                var direction = "&#129121;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 10 && parseInt(testcase[key][key2]['heading']) < 70){
+                var direction = "&#129125;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 70 && parseInt(testcase[key][key2]['heading']) < 100){
+                var direction = "&#129122;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 100 && parseInt(testcase[key][key2]['heading']) < 160){
+                var direction = "&#129126;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 160 && parseInt(testcase[key][key2]['heading']) < 190){
+                var direction = "&#129123;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 190 && parseInt(testcase[key][key2]['heading']) < 260){
+                var direction = "&#129127;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 260 && parseInt(testcase[key][key2]['heading']) < 280){
+                var direction = "&#8592;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 280 && parseInt(testcase[key][key2]['heading']) < 340){
+                var direction = "&#129124;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 340 && parseInt(testcase[key][key2]['heading']) < 361){
+                var direction = "&#129121;"
+              }
+              else {
+                var direction = "POOP"
+              }
+              try {
+                arrivalTime = testcase[key][key2]['arrT'].split('T')[1]
+              }
+              catch {
+                arrivalTime = "???"
+              }
+              msg = testcase[key][key2]['rn'] + direction + testcase[key][key2]['destNm'] + ": Arrive "+ testcase[key][key2]['nextStaNm'] + " at " + arrivalTime
+              var train = L.circle([testcase[key][key2]['lat'], testcase[key][key2]['lon']], ctaRadius, {
+		            color: 'black',
+		            fillColor: routeColor,
+		            fillOpacity: 0.8
+	            }).bindPopup(msg).addTo(trains);
           }
       }
-
-    /*$.getJSON('https://api.metro.net/agencies/lametro/vehicles/', function(data) {
-      $(data.items).each(function(index,value){
-          /*var bus = L.circle([value.latitude, value.longitude], 100.bindPopup("Vehicle " + value.id).addTo(trains);
-          trains.addTo(mymap);
-          console.log(value.id);
-      });}*/
-  }
-
-
+  
+}
+    console.log(ctaRadius)
     plot();
+    map.on('zoomend', function(){
+      console.log(ctaRadius)
+      console.log(metraRadius)
+      var currentZoom = map.getZoom();
+      zoomDiff = currentZoom - 11;
+      if (zoomDiff > 3){
+        zoomDiff = 3
+      }
+      console.log(zoomDiff)
+      map.removeLayer(trains);
+      trains.clearLayers();
+      var startRadius = 400
+      var startRadius2 = 600
+      ctaRadius = startRadius - (100 * zoomDiff)
+      metraRadius = startRadius2 - (150 * zoomDiff)
+      plot();
+      /*for (var train in trains){
+        train.getRadius();
+      }
+      /*trains.clearLayers();
+      plot()*/
+    })
     setInterval(function(){
       map.removeLayer(trains);
-      map.removeLayer(buses);
       trains.clearLayers();
-      buses.clearLayers();
+      /*buses.removeLayer(buses);
+      buses.clearLayers();*/
       plot();
-      /*mymap.removeLayer(buses);
-      buses.clearLayers();
-      plot2();*/
-    },10000);
+    },30000);
       // show the scale bar on the lower left corner
       L.control.scale().addTo(map);
 
-      // show a marker on the map
-      // L.marker({lon: 0, lat: 0}).bindPopup('The center of the world').addTo(map);
     </script>
   </body>
-  </html>
+</html>

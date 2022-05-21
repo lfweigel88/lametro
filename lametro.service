@@ -1,0 +1,14 @@
+[Unit]
+Description=LA Metro Data Pull
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart=/usr/bin/python3 /var/www/html/lametro/lametro.py > /var/www/html/lametro/lametro.log 2>&1
+
+[Install]
+WantedBy=multi-user.target

@@ -40,7 +40,10 @@
       }).addTo(map);
       var trains = L.layerGroup();
       var stops = L.layerGroup();
+      var buses = L.layerGroup();
+      var busstops = L.layerGroup();
   let lamRadius = 600
+  let lambusRadius = 200
   function stopPlot() {
       var stopsHTTP = new XMLHttpRequest;
       stopsHTTP.open("GET", "stops.json", false);
@@ -56,7 +59,25 @@
       }
       stops.addTo(map);
 } 
-stopPlot(); 
+stopPlot();
+function busPlot() {
+      bussycolor = "#15be4c";
+      bussyradius = "300";
+      var busHttp = new XMLHttpRequest;
+      busHttp.open("GET", 'lametro-bus.json', false);
+      busHttp.send( null );
+      testcase3 = busHttp.responseText.toString();
+      testcase3 = JSON.parse(testcase3);
+      for (var key in testcase3){
+        var bus = L.circle([testcase3[key]['latitude'], testcase3[key]['longitude']], bussyradius, {
+          color: bussycolor,
+          fillColor: bussycolor,
+          fillOpacity: 0.8
+        }).bindPopup(testcase3[key]['timestamp'] + '<br> Route: ' + testcase3[key]['route_id'] + '<br> Vehicle: ' + testcase3[key]['vehicle_id'] + ' - ' + testcase3[key]['status'] + '<br> Next Stop: ' + testcase3[key]['next_stop']).addTo(buses);
+      }   
+      buses.addTo(map);
+    }
+busPlot();
 function plot() {
       var xmlHttp2 = new XMLHttpRequest;
       xmlHttp2.open("GET", 'lametro.json', false);
@@ -89,7 +110,7 @@ function plot() {
                     color: 'black',
                     fillColor: routeColor,
                     fillOpacity: 0.8
-            }).bindPopup('Vehicle: ' + testcase2[key]['vehicle_id'] + ' - ' + testcase2[key]['status'] + '<br>' + 'Route: ' + testcase2[key]['route_id'] + '<br> Next Stop: ' + testcase2[key]['next_stop']).addTo(trains);
+            }).bindPopup(testcase2[key]['timestamp'] + '<br> Vehicle: ' + testcase2[key]['vehicle_id'] + ' - ' + testcase2[key]['status'] + '<br> Next Stop: ' + testcase2[key]['next_stop']).addTo(trains);
           }
       trains.addTo(map);
         }

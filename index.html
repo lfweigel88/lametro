@@ -40,7 +40,10 @@
       }).addTo(map);
       var trains = L.layerGroup();
       var stops = L.layerGroup();
+      var buses = L.layerGroup();
+      var busstops = L.layerGroup();
   let lamRadius = 600
+  let lambusRadius = 100
   function stopPlot() {
       var stopsHTTP = new XMLHttpRequest;
       stopsHTTP.open("GET", "stops.json", false);
@@ -56,7 +59,24 @@
       }
       stops.addTo(map);
 } 
-stopPlot(); 
+stopPlot();
+function busPlot() {
+      bussycolor = "#ce03fc";
+      var busHttp = new XMLHttpRequest;
+      busHttp.open("GET", 'lametro-bus.json', false);
+      busHttp.send( null );
+      testcase3 = busHttp.responseText.toString();
+      testcase3 = JSON.parse(testcase3);
+      for (var key in testcase3){
+        var bus = L.circle([testcase3[key]['latitude'], testcase3[key]['longitude']], lambusRadius, {
+          color: bussycolor,
+          fillColor: 'black',
+          fillOpacity: 0.8
+        }).bindPopup(testcase3[key]['timestamp'] + '<br> Route: ' + testcase3[key]['route_id'] + '<br> Vehicle: ' + testcase3[key]['vehicle_id'] + ' - ' + testcase3[key]['status'] + '<br> Next Stop: ' + testcase3[key]['next_stop']).addTo(buses);
+      }   
+      buses.addTo(map);
+    }
+busPlot();
 function plot() {
       var xmlHttp2 = new XMLHttpRequest;
       xmlHttp2.open("GET", 'lametro.json', false);
@@ -85,11 +105,41 @@ function plot() {
       else{
           var routeColor = 'black';
       }
+      if (parseInt(testcase2[key]['bearing']) >= 0 && parseInt(testcase2[key]['bearing']) < 10){
+        var direction = "&#x2191;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 10 && parseInt(testcase2[key]['bearing']) < 70){
+        var direction = "&#x2197;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 70 && parseInt(testcase2[key]['bearing']) < 110){
+        var direction = "&#x2192;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 110 && parseInt(testcase2[key]['bearing']) < 160){
+        var direction = "&#x2198;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 160 && parseInt(testcase2[key]['bearing']) < 190){
+        var direction = "&#x2193;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 190 && parseInt(testcase2[key]['bearing']) < 260){
+        var direction = "&#x2199;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 260 && parseInt(testcase2[key]['bearing']) < 280){
+        var direction = "&#x2190;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) >= 280 && parseInt(testcase2[key]['bearing']) < 340){
+        var direction = "&#x2196;"
+      }
+      else if (parseInt(testcase2[key]['bearing']) > 340 && parseInt(testcase2[key]['bearing']) <= 360){
+        var direction = "&#x2191;"
+      }
+      else {
+        var direction = testcase2[key]['bearing']
+      }
       var train = L.circle([testcase2[key]['latitude'], testcase2[key]['longitude']], lamRadius, {
                     color: 'black',
                     fillColor: routeColor,
                     fillOpacity: 0.8
-            }).bindPopup('Vehicle: ' + testcase2[key]['vehicle_id'] + ' - ' + testcase2[key]['status'] + '<br>' + 'Route: ' + testcase2[key]['route_id'] + '<br> Next Stop: ' + testcase2[key]['next_stop']).addTo(trains);
+            }).bindPopup(testcase2[key]['timestamp'] + '<br> Vehicle: ' + testcase2[key]['vehicle_id'] + ' - ' + testcase2[key]['status'] + ' ' + direction + '<br> Next Stop: ' + testcase2[key]['next_stop']).addTo(trains);
           }
       trains.addTo(map);
         }

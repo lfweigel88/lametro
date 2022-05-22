@@ -1,22 +1,24 @@
 #!/usr/bin/python3
+#id: "4043"
 #vehicle {
 #  trip {
-#    trip_id: "55987526"
-#    start_date: "20220520"
-#    route_id: "801"
+#    trip_id: "60060001631728-FEB22"
+#    start_date: "20220521"
+#    route_id: "60-13159"
 #  }
 #  position {
-#    latitude: 33.860725
-#    longitude: -118.21622
-#    bearing: 161.00594
+#    latitude: 33.98965
+#    longitude: -118.22538
+#    bearing: 179.90164
+#    speed: 0.044704
 #  }
-#  current_stop_sequence: 14
-#  current_status: IN_TRANSIT_TO
-#  timestamp: 1653095509
-#  stop_id: "80109"
+#  current_stop_sequence: 33
+#  current_status: STOPPED_AT
+#  timestamp: 1653181935
+#  stop_id: "12714"
 #  vehicle {
-#    id: "1075-1098-1130"
-#    label: "1075-1098-1130"
+#    id: "4043"
+#    label: "4043"
 #  }
 #}
 import time
@@ -32,10 +34,10 @@ feed = gtfs_realtime_pb2.FeedMessage()
 feeddict = {}
 stopsdict = {}
 headers = {'Authorization': lamkey}
-stops = requests.get("https://gitlab.com/LACMTA/gtfs_rail/-/raw/master/stops.txt")
-with open(homedir + 'stops.csv','w') as file:
+stops = requests.get("https://gitlab.com/LACMTA/gtfs_bus/-/raw/master/stops.txt")
+with open(homedir + 'busstops.csv','w') as file:
         file.write(stops.text)
-with open (homedir + 'stops.csv','r') as csv_file:
+with open (homedir + 'busstops.csv','r') as csv_file:
         i = 0
         csv_reader = csv.reader(csv_file, delimiter=',')
         fields = next(csv_reader)
@@ -50,14 +52,13 @@ with open (homedir + 'stops.csv','r') as csv_file:
                 stopsdict[i]['lat'] = lat
                 stopsdict[i]['long'] = long
                 i = i + 1
-with open (homedir + 'stops.json','w') as file:
+with open (homedir + 'busstops.json','w') as file:
         file.write(json.dumps(stopsdict))
 while True:
-        response = requests.get('https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-vehicle-positions',headers=headers)
+        response = requests.get('https://api.goswift.ly/real-time/lametro/gtfs-rt-vehicle-positions',headers=headers)
         feed.ParseFromString(response.content)
         i = 0
         for entity in feed.entity:
-                #print(entity)
                 if not entity.vehicle.trip.route_id:
                         continue
                 else:
@@ -76,7 +77,7 @@ while True:
                                 feeddict[i]['status'] = "STOPPED"
                         if entity.vehicle.current_status == 2:
                                 feeddict[i]['status'] = "IN TRANSIT"
-                        with open(homedir + 'stops.csv') as csv_file:
+                        with open(homedir + 'busstops.csv') as csv_file:
                                 csv_reader = csv.reader(csv_file, delimiter=',')
                                 fields = next(csv_reader)
                                 for row in csv_reader:
@@ -86,7 +87,6 @@ while True:
                                         else:
                                                 feeddict[i]['next_stop'] = "UNKNOWN"
                 i = i + 1
-        with open(homedir + 'lametro.json','w') as file:
+        with open(homedir + 'lametro-bus.json','w') as file:
                 file.write(json.dumps(feeddict))
-        time.sleep(30)
-
+        time.sleep(90)

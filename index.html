@@ -43,7 +43,8 @@
       var buses = L.layerGroup();
       var busstops = L.layerGroup();
   let lamRadius = 600
-  let lambusRadius = 100
+  let lamBusSilverRadius = 600
+  let lamBusRadius = 200
   function stopPlot() {
       var stopsHTTP = new XMLHttpRequest;
       stopsHTTP.open("GET", "stops.json", false);
@@ -61,16 +62,25 @@
 } 
 stopPlot();
 function busPlot() {
-      bussycolor = "#ce03fc";
       var busHttp = new XMLHttpRequest;
       busHttp.open("GET", 'lametro-bus.json', false);
       busHttp.send( null );
       testcase3 = busHttp.responseText.toString();
       testcase3 = JSON.parse(testcase3);
       for (var key in testcase3){
+        if (testcase3[key]['route_id'].includes('910') || testcase3[key]['route_id'].includes('950')){
+		lambusRadius = lamBusSilverRadius
+                bussycolor = 'black'
+                bussyfill = 'silver'
+        } 
+        else {
+                lambusRadius = lamBusRadius
+                bussycolor = '#ce03fc'
+                bussyfill = 'black'
+        }
         var bus = L.circle([testcase3[key]['latitude'], testcase3[key]['longitude']], lambusRadius, {
           color: bussycolor,
-          fillColor: 'black',
+          fillColor: bussyfill,
           fillOpacity: 0.8
         }).bindPopup(testcase3[key]['timestamp'] + '<br> Route: ' + testcase3[key]['route_id'] + '<br> Vehicle: ' + testcase3[key]['vehicle_id'] + ' - ' + testcase3[key]['status'] + '<br> Next Stop: ' + testcase3[key]['next_stop']).addTo(buses);
       }   
@@ -101,6 +111,9 @@ function plot() {
       }
       else if (testcase2[key]['route_id'] == '806'){
           var routeColor = '#5BC2E7';
+      }
+      else if (testcase2[key]['route_id'] == '807'){
+          var routeColor = '#e346be';
       }
       else{
           var routeColor = 'black';
@@ -152,15 +165,24 @@ function plot() {
       }
       map.removeLayer(trains);
       trains.clearLayers();
+      map.removeLayer(buses);
+      buses.clearLayers();
       var startRadius = 400
       var startRadius2 = 600
+      var startBusRadius = 200
       lamRadius = startRadius - (100 * zoomDiff)
+      lamBusSilverRadius = startRadius - (100 * zoomDiff)
+      lamBusRadius = startBusRadius - (100 * zoomDiff)
       plot();
+      busPlot();
     })
     setInterval(function(){
       map.removeLayer(trains);
       trains.clearLayers();
+      map.removeLayer(buses);
+      buses.clearLayers();
       plot();
+      busPlot();
     },30000);
       L.control.scale().addTo(map);
     </script>

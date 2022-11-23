@@ -174,10 +174,10 @@ function plot() {
       buses.clearLayers();
       var startRadius = 400
       var startRadius2 = 600
-      var startBusRadius = 200
+      var startBusRadius = 300
       lamRadius = startRadius - (100 * zoomDiff)
-      lamBusSilverRadius = startRadius - (100 * zoomDiff)
-      lamBusRadius = startBusRadius - (100 * zoomDiff)
+      lamBusSilverRadius = lamRadius
+      lamBusRadius = lamRadius / 2.5
       plot();
       busPlot();
     })

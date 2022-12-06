@@ -68,12 +68,17 @@ function busPlot() {
       testcase3 = busHttp.responseText.toString();
       testcase3 = JSON.parse(testcase3);
       for (var key in testcase3){
-        if (testcase3[key]['route_id'].includes('910') || testcase3[key]['route_id'].includes('950')){
-		lambusRadius = lamBusSilverRadius
+        if (testcase3[key]['route_id'].includes('910-')){
+                lambusRadius = lamBusSilverRadius
+                bussycolor = 'black'
+                bussyfill = 'silver'
+        }
+        else if (testcase3[key]['route_id'].includes('950-')){
+                lambusRadius = lamBusSilverRadius
                 bussycolor = 'black'
                 bussyfill = 'silver'
         } 
-        if (testcase3[key]['route_id'].includes('901')){
+        else if (testcase3[key]['route_id'].includes('901-')){
                 lambusRadius = lamBusSilverRadius
                 bussycolor = 'black'
                 bussyfill = '#e28743'

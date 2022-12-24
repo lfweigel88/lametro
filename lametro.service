@@ -8,7 +8,9 @@ Type=simple
 Restart=always
 RestartSec=5
 User=root
-ExecStart=/usr/bin/python3 /var/www/html/lametro/lametro.py > /var/www/html/lametro/lametro.log 2>&1
+ExecStart=/usr/bin/python3 /var/www/html/lametro/lametro.py
+StandardOutput=/var/www/html/lametro/lametro.log
+StandardError=/var/www/html/lametro/lametro_error.log
 
 [Install]
 WantedBy=multi-user.target

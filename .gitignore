@@ -8,3 +8,7 @@ lametro.log
 stops.csv
 stops.json
 lamvars.py
+cta/ctavars.py
+ctavars.py
+*.json
+*vars*

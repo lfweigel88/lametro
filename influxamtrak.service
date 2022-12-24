@@ -1,0 +1,16 @@
+[Unit]
+Description=Amtrak Influx Push
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart=/usr/bin/python3 /var/www/html/lametro/influxamtrak.py
+StandardOutput=/var/www/html/lametro/influxamtrak.log
+StandardError=/var/www/html/lametro/influxamtrak_error.log
+
+[Install]
+WantedBy=multi-user.target

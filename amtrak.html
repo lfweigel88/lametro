@@ -41,6 +41,7 @@
       var trains = L.layerGroup();
       var stops = L.layerGroup();
       var buses = L.layerGroup();
+      var amtraks = L.layerGroup();
       var busstops = L.layerGroup();
   let lamRadius = 600
   let lamBusSilverRadius = 600
@@ -62,6 +63,37 @@
       stops.addTo(map);
 } 
 stopPlot();
+function amtrakPlot() {
+        amtrakcolor = 'red'
+        amtrakfill = '#3266a8'
+        yellowtrains = 0
+        greentrains = 0
+        redtrains = 0
+	var amtrakHttp = new XMLHttpRequest;
+        amtrakHttp.open("GET", "amtrak.json", false);
+        amtrakHttp.send( null );
+	testcase4 = amtrakHttp.responseText.toString();
+	testcase4 = JSON.parse(testcase4);
+	for (var key in testcase4){
+                if (testcase4[key]['speed'] > 30){
+                    amtrakcolor = 'yellow'
+                    yellowtrains = yellowtrains + 1
+                }
+                else if (testcase4[key]['speed'] > 60){
+                    amtrakcolor = 'green'
+                    greentrains = greentrains + 1
+                }
+                else {
+                    amtrakcolor = 'red'
+                    redtrains = redtrains + 1
+                }
+		var amtrak = L.circle([testcase4[key]['latitude'], testcase4[key]['longitude']], amtrakRadius, {color: amtrakcolor,fillColor: amtrakfill,fillOpacity: 0.8}).bindPopup(testcase4[key]['timestamp'] + '<br> Route: ' + testcase4[key]['route_id'] + '<br> Vehicle: ' + testcase4[key]['vehicle_id'] + '<br>Speed: ' + testcase4[key]['speed'] + ' mph' + '<br>' + testcase4[key]['status']  + ': ' + testcase4[key]['stop_id']).addTo(amtraks);}
+     amtraks.addTo(map);
+     console.log("Yellow trains: " + yellowtrains);
+     console.log("Green trains: " + greentrains);
+     console.log("Red trains: " + redtrains);
+}
+amtrakPlot();
 function busPlot() {
       var busHttp = new XMLHttpRequest;
       busHttp.open("GET", 'lametro-bus.json', false);
@@ -170,6 +202,7 @@ function plot() {
     plot();
     map.on('zoomend', function(){
       var currentZoom = map.getZoom();
+      console.log(currentZoom);
       zoomDiff = currentZoom - 11;
       if (zoomDiff > 3){
         zoomDiff = 3
@@ -178,22 +211,32 @@ function plot() {
       trains.clearLayers();
       map.removeLayer(buses);
       buses.clearLayers();
+      amtraks.clearLayers();
       var startRadius = 400
       var startRadius2 = 600
       var startBusRadius = 300
+      var startAmtrakRadius = 800
       lamRadius = startRadius - (100 * zoomDiff)
+      amtrakRadius = lamRadius * 2
       lamBusSilverRadius = lamRadius
       lamBusRadius = lamRadius / 2.5
+      if (currentZoom < 8){
+          amtrakRadius = 4000 / (currentZoom/20);
+          console.log(amtrakRadius);
+      }
       plot();
       busPlot();
+      amtrakPlot();
     })
     setInterval(function(){
       map.removeLayer(trains);
       trains.clearLayers();
       map.removeLayer(buses);
       buses.clearLayers();
+      amtraks.clearLayers();
       plot();
       busPlot();
+      amtrakPlot();
     },30000);
       L.control.scale().addTo(map);
     </script>

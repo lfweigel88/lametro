@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/var/www/html/lametro/venv/bin/python3
 import time
 import requests
 import os

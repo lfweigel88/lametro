@@ -12,3 +12,4 @@ cta/ctavars.py
 ctavars.py
 *.json
 *vars*
+venv/

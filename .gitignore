@@ -12,3 +12,4 @@ stops.json
 martavars.py
 *.csv
 lamvars.py
+venv/

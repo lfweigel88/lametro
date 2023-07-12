@@ -39,6 +39,8 @@
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
       }).addTo(map);
       var trains = L.layerGroup();
+      var martas = L.layerGroup();
+      var mbtas = L.layerGroup();
       var stops = L.layerGroup();
       var buses = L.layerGroup();
       var amtraks = L.layerGroup();
@@ -47,6 +49,8 @@
   let lamBusSilverRadius = 600
   let lamBusRadius = 200
   let amtrakRadius = 800
+  let ctaRadius = 400
+  let metraRadius = 600
   function stopPlot() {
       var stopsHTTP = new XMLHttpRequest;
       stopsHTTP.open("GET", "stops.json", false);
@@ -66,8 +70,10 @@ stopPlot();
 function amtrakPlot() {
         amtrakcolor = 'red'
         amtrakfill = '#3266a8'
+        cyantrains = 0
         yellowtrains = 0
         greentrains = 0
+        orangetrains = 0 
         redtrains = 0
 	var amtrakHttp = new XMLHttpRequest;
         amtrakHttp.open("GET", "amtrak.json", false);
@@ -75,20 +81,30 @@ function amtrakPlot() {
 	testcase4 = amtrakHttp.responseText.toString();
 	testcase4 = JSON.parse(testcase4);
 	for (var key in testcase4){
-                if (testcase4[key]['speed'] > 30){
-                    amtrakcolor = 'yellow'
-                    yellowtrains = yellowtrains + 1
+                if (testcase4[key]['speed'] > 90){
+                    amtrakcolor = '#42f5f2'
+                    cyantrains = cyantrains + 1
                 }
                 else if (testcase4[key]['speed'] > 60){
                     amtrakcolor = 'green'
-                    greentrains = greentrains + 1
+                    yellowtrains = greentrains + 1
+                }
+                else if (testcase4[key]['speed'] > 30){
+                    amtrakcolor = 'yellow'
+                    yellowtrains = yellowtrains + 1
+                }
+                else if (testcase4[key]['speed'] > 0){
+                    amtrakcolor = 'orange'
+                    orangetrains = orangetrains + 1
                 }
                 else {
                     amtrakcolor = 'red'
                     redtrains = redtrains + 1
                 }
-		var amtrak = L.circle([testcase4[key]['latitude'], testcase4[key]['longitude']], amtrakRadius, {color: amtrakcolor,fillColor: amtrakfill,fillOpacity: 0.8}).bindPopup(testcase4[key]['timestamp'] + '<br> Route: ' + testcase4[key]['route_id'] + '<br> Vehicle: ' + testcase4[key]['vehicle_id'] + '<br>Speed: ' + testcase4[key]['speed'] + ' mph' + '<br>' + testcase4[key]['status']  + ': ' + testcase4[key]['stop_id']).addTo(amtraks);}
+		var amtrak = L.circle([testcase4[key]['latitude'], testcase4[key]['longitude']], amtrakRadius, {color: amtrakcolor,fillColor: amtrakfill,fillOpacity: 0.8}).bindPopup(testcase4[key]['timestamp'] + '<br> Route: ' + testcase4[key]['trainname'] + '<br> Vehicle: ' + testcase4[key]['vehicle_id'] + '<br>Speed: ' + testcase4[key]['speed'] + ' mph' + '<br>' + testcase4[key]['status']  + ': ' + testcase4[key]['stop_id']).addTo(amtraks);}
      amtraks.addTo(map);
+     console.log("Cyan trains: " + cyantrains);
+     console.log("Orange trains: " + orangetrains);
      console.log("Yellow trains: " + yellowtrains);
      console.log("Green trains: " + greentrains);
      console.log("Red trains: " + redtrains);
@@ -197,9 +213,209 @@ function plot() {
                     fillOpacity: 0.8
             }).bindPopup(testcase2[key]['timestamp'] + '<br> Vehicle: ' + testcase2[key]['vehicle_id'] + ' - ' + testcase2[key]['status'] + ' ' + direction + '<br> Next Stop: ' + testcase2[key]['next_stop']).addTo(trains);
           }
-      trains.addTo(map);
-        }
+}
+    trains.addTo(map);
     plot();
+
+function martaPlot(){
+  var martaHTTP = new XMLHttpRequest;
+  martaHTTP.open("GET", 'marta.json', false);
+  martaHTTP.send( null );
+  martacase = martaHTTP.responseText.toString()
+  martacase = JSON.parse(martacase)
+  var mbtaHTTP = new XMLHttpRequest;
+  mbtaHTTP.open("GET", 'mbta.json', false);
+  mbtaHTTP.send( null );
+  mbtacase = mbtaHTTP.responseText.toString()
+  mbtacase = JSON.parse(mbtacase)
+  for (var martakey in martacase){
+    if (martacase[martakey]['line'] == 'GOLD'){
+      martaFill = 'gold';
+    }
+    if (martacase[martakey]['line'] == 'GREEN'){
+      martaFill = 'green';
+    }
+    if (martacase[martakey]['line'] == 'BLUE'){
+      martaFill = 'blue';
+    }
+    else {
+      martaFill = 'red';
+    }
+    msg = martacase[martakey]['timestamp'] + '<br>' + martacase[martakey]['line'] + ' LINE <br>Vehicle: ' + martacase[martakey]['train_id'] + ": Arrive " + martacase[martakey]['next_stop'] + '<br>' + martacase[martakey]['bearing'] + '-bound'
+    var martatrain = L.circle([martacase[martakey]['longitude'], martacase[martakey]['latitude']], lamRadius, {
+                            color: 'black',
+                            fillColor: martaFill,
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(martas);
+  }
+  for (var mbtakey in mbtacase) {
+    msg = mbtacase[mbtakey]['timestamp'] + '<br> Vehicle: ' + mbtacase[mbtakey]['route_id'] + ': ' + mbtacase[mbtakey]['vehicle_id'] + '<br> ' + mbtacase[mbtakey]['status'] + ': ' + mbtacase[mbtakey]['stop_id'] + '<br> ' + mbtacase[mbtakey]['speed'] + ' mph'
+    var mbtatrain = L.circle([mbtacase[mbtakey]['latitude'], [mbtacase[mbtakey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: 'green',
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(mbtas);
+  }
+  martas.addTo(map);
+  mbtas.addTo(map);
+  }
+martaPlot();
+var ctaTrains = L.layerGroup();
+var ctaBuses = L.layerGroup();
+var ctaStops = L.layerGroup();
+      
+      $.getJSON('cta/metrastops.json', function(data){
+
+      for (key in data){
+        var stop = L.circle([data[key]['stop_lat'], data[key]['stop_lon']], 50, {
+                    color: "#05872a",
+                    fillColor: "white",
+                    fillOpacity: 0.2
+                  }).bindPopup(data[key]['stop_url'].split('/')[5] + ": " +data[key]['stop_name'] + '/Zone ' + data[key]['zone_id']).addTo(stops);
+      }
+      ctaStops.addTo(map)
+    }
+    )
+function ctaPlot()
+  {
+    $.getJSON('cta/metra.json', function(data) {
+                        $(data).each(function(index,value){
+                            /*mymap.eachLayer(function(layer){
+                              console.log(layer);*/
+                            if (value.vehicle.trip.route_id == 'UP-NW'){
+                                var routeColor = '#803d0a'
+                            }
+                            else if (value.vehicle.trip.route_id == 'UP-N'){
+                                var routeColor = '#145A32'
+                            }
+                            else if (value.vehicle.trip.route_id == 'SWS'){
+                                var routeColor = '#4287f5'
+                            }
+                            else if (value.vehicle.trip.route_id == 'RI'){
+                                var routeColor = '#fc0000'
+                            }
+                            else if (value.vehicle.trip.route_id == 'NCS'){
+                                var routeColor = '#8f00fc'
+                            }
+                            else if (value.vehicle.trip.route_id == 'MD-N'){
+                                var routeColor = '#fc9300'
+                            }
+                            else if (value.vehicle.trip.route_id == 'HC'){
+                                var routeColor = '#2d006b'
+                            }
+                            else if (value.vehicle.trip.route_id == 'ME'){
+                                var routeColor = '#ff9500'
+                            }
+                            else if (value.vehicle.trip.route_id == 'BNSF'){
+                                var routeColor = '#00e390'
+                            }
+                            else if (value.vehicle.trip.route_id == 'UP-W'){
+                                var routeColor = '#e3c60b'
+                            }
+                            else if (value.vehicle.trip.route_id == 'MD-W'){
+                                var routeColor = '#ff63f2'
+                            }
+                            else {
+                                var routeColor = 'yellow'
+                            }
+                            var msg = value.vehicle.trip.trip_id
+                            var ctaTrain = L.circle([value.vehicle.position.latitude, value.vehicle.position.longitude], metraRadius, {
+		                    color: '#3252a8',
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.8
+	                    }).bindPopup(msg + " " + value.vehicle.timestamp.low.split("T")[1].split(".")[0]).addTo(ctaTrains);
+                      
+                            /*L.trains.addTo(mymap);*/
+                            /*L.circle([value.latitude, value.longitude], 200, {
+		                    color: routeColor,
+		                    fillColor: routeColor,
+		                    fillOpacity: 0.5
+	                    }).addTo(mymap).bindPopup("Vehicle " + value.id);*/
+                        });
+                        /*console.log(trains);*/
+                        ctaTrains.addTo(map);
+
+                        }
+                    );
+                    
+      var xmlHttp = new XMLHttpRequest;
+      xmlHttp.open("GET", 'cta/cta.json', false);
+      xmlHttp.send( null );
+      testcase = xmlHttp.responseText.toString()
+      testcase = JSON.parse(testcase)
+      for (var key in testcase) {
+        if (key == 'G') {
+            routeColor = 'green'
+        }
+        else if (key == 'blue'){
+            routeColor = 'blue'
+        }
+        else if (key == 'red'){
+            routeColor = 'red'
+        }
+        else if (key == 'brn'){
+            routeColor = 'brown'
+        }
+        else if (key == 'org'){
+            routeColor = 'orange'
+        }
+        else if (key == 'p'){
+            routeColor = 'purple'
+        }
+        else if (key == 'pink'){
+            routeColor = 'pink'
+        }
+        else {
+            routeColor = 'black'
+        }
+          for (var key2 in testcase[key]) {
+              if (parseInt(testcase[key][key2]['heading']) > 0 && parseInt(testcase[key][key2]['heading']) < 10){
+                var direction = "&#129121;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 10 && parseInt(testcase[key][key2]['heading']) < 70){
+                var direction = "&#129125;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 70 && parseInt(testcase[key][key2]['heading']) < 100){
+                var direction = "&#129122;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 100 && parseInt(testcase[key][key2]['heading']) < 160){
+                var direction = "&#129126;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 160 && parseInt(testcase[key][key2]['heading']) < 190){
+                var direction = "&#129123;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 190 && parseInt(testcase[key][key2]['heading']) < 260){
+                var direction = "&#129127;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 260 && parseInt(testcase[key][key2]['heading']) < 280){
+                var direction = "&#8592;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 280 && parseInt(testcase[key][key2]['heading']) < 340){
+                var direction = "&#129124;"
+              }
+              else if (parseInt(testcase[key][key2]['heading']) > 340 && parseInt(testcase[key][key2]['heading']) < 361){
+                var direction = "&#129121;"
+              }
+              else {
+                var direction = "POOP"
+              }
+              try {
+                arrivalTime = testcase[key][key2]['arrT'].split('T')[1]
+              }
+              catch {
+                arrivalTime = "???"
+              }
+              msg = testcase[key][key2]['rn'] + direction + testcase[key][key2]['destNm'] + ": Arrive "+ testcase[key][key2]['nextStaNm'] + " at " + arrivalTime
+              var ctaTrain = L.circle([testcase[key][key2]['lat'], testcase[key][key2]['lon']], ctaRadius, {
+		            color: 'black',
+		            fillColor: routeColor,
+		            fillOpacity: 0.8
+	            }).bindPopup(msg).addTo(ctaTrains);
+          }
+      }
+  
+}
+ctaPlot();
     map.on('zoomend', function(){
       var currentZoom = map.getZoom();
       console.log(currentZoom);
@@ -207,11 +423,12 @@ function plot() {
       if (zoomDiff > 3){
         zoomDiff = 3
       }
-      map.removeLayer(trains);
       trains.clearLayers();
-      map.removeLayer(buses);
       buses.clearLayers();
       amtraks.clearLayers();
+      martas.clearLayers();
+      mbtas.clearLayers();
+      ctaTrains.clearLayers();
       var startRadius = 400
       var startRadius2 = 600
       var startBusRadius = 300
@@ -227,16 +444,21 @@ function plot() {
       plot();
       busPlot();
       amtrakPlot();
+      martaPlot();
+      ctaPlot();
     })
     setInterval(function(){
-      map.removeLayer(trains);
       trains.clearLayers();
-      map.removeLayer(buses);
       buses.clearLayers();
       amtraks.clearLayers();
+      martas.clearLayers();
+      mbtas.clearLayers();
+      ctaTrains.clearLayers();
       plot();
       busPlot();
       amtrakPlot();
+      martaPlot();
+      ctaPlot();
     },30000);
       L.control.scale().addTo(map);
     </script>

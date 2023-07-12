@@ -1,0 +1,16 @@
+[Unit]
+Description=Marta Data Pull
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart=/usr/bin/python3 /var/www/html/lametro/marta.py
+StandardOutput=/var/www/html/lametro/marta.log
+StandardError=/var/www/html/lametro/marta_error.log
+
+[Install]
+WantedBy=multi-user.target

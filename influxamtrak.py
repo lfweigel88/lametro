@@ -11,8 +11,9 @@ while True:
         json_body = {
             "measurement": "route_stats",
             "tags": {
-                "route_id": r[train]['route_id']
+                "train_id": r[train]['trainname']
             },
+            "time": r[train]['unixstamp'],
             "fields": {
                 "latitude": r[train]['latitude'],
                 "longitude": r[train]['longitude'],
@@ -22,4 +23,5 @@ while True:
         }
         json_payload.append(json_body)
     client.write_points(json_payload)
+    print(json_payload)
     time.sleep(60)

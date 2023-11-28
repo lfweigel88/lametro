@@ -8,7 +8,7 @@ from martavars import apikey
 from martavars import homedir
 feeddict = {}
 while True:
-        response = requests.get('https://developerservices.itsmarta.com:18096/railrealtimearrivals?apiKey='+apikey)
+        response = requests.get('https://developerservices.itsmarta.com:18096/railrealtimearrivals?apiKey='+apikey,verify=False)
         i = 0
         response = response.json()['RailArrivals']
         for entity in response:

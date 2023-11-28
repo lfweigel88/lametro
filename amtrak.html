@@ -41,6 +41,7 @@
       var trains = L.layerGroup();
       var martas = L.layerGroup();
       var mbtas = L.layerGroup();
+      var rtds = L.layerGroup();
       var stops = L.layerGroup();
       var buses = L.layerGroup();
       var amtraks = L.layerGroup();
@@ -228,14 +229,24 @@ function martaPlot(){
   mbtaHTTP.send( null );
   mbtacase = mbtaHTTP.responseText.toString()
   mbtacase = JSON.parse(mbtacase)
+  var rtdHTTP = new XMLHttpRequest;
+  rtdHTTP.open("GET", 'rtd.json', false);
+  rtdHTTP.send( null );
+  rtdcase = rtdHTTP.responseText.toString()
+  rtdcase = JSON.parse(rtdcase)
+  var stlHTTP = new XMLHttpRequest;
+  stlHTTP.open("GET", 'stl.json', false);
+  stlHTTP.send( null );
+  stlcase = stlHTTP.responseText.toString()
+  stlcase = JSON.parse(stlcase)
   for (var martakey in martacase){
     if (martacase[martakey]['line'] == 'GOLD'){
       martaFill = 'gold';
     }
-    if (martacase[martakey]['line'] == 'GREEN'){
+    else if (martacase[martakey]['line'] == 'GREEN'){
       martaFill = 'green';
     }
-    if (martacase[martakey]['line'] == 'BLUE'){
+    else if (martacase[martakey]['line'] == 'BLUE'){
       martaFill = 'blue';
     }
     else {
@@ -256,8 +267,37 @@ function martaPlot(){
                             fillOpacity: 0.8
                     }).bindPopup(msg).addTo(mbtas);
   }
+  for (var rtdkey in rtdcase) {
+    if (rtdcase[rtdkey]['route_id'].includes('A')){
+      rtdFill = 'blue';
+    }
+    else {
+      rtdFill = 'green';
+    }
+    msg = rtdcase[rtdkey]['timestamp'] + '<br> Vehicle: ' + rtdcase[rtdkey]['route_id'] + ': ' + rtdcase[rtdkey]['vehicle_id'] + '<br> ' + rtdcase[rtdkey]['status'] + ': ' + rtdcase[rtdkey]['stop_id'] + '<br> ' + rtdcase[rtdkey]['speed'] + ' mph'
+    var rtdtrain = L.circle([rtdcase[rtdkey]['latitude'], [rtdcase[rtdkey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: rtdFill,
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(rtds);
+  }
+  for (var stlkey in stlcase) {
+    if (stlcase[stlkey]['route_id'].includes('A')){
+      stlFill = 'blue';
+    }
+    else {
+      stlFill = 'green';
+    }
+    msg = stlcase[stlkey]['timestamp'] + '<br> Vehicle: ' + stlcase[stlkey]['route_id'] + ': ' + stlcase[stlkey]['vehicle_id'] + '<br> ' + stlcase[stlkey]['status'] + ': ' + stlcase[stlkey]['stop_id'] + '<br> '
+    var stltrain = L.circle([stlcase[stlkey]['latitude'], [stlcase[stlkey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: stlFill,
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(rtds);
+  }       
   martas.addTo(map);
   mbtas.addTo(map);
+  rtds.addTo(map);
   }
 martaPlot();
 var ctaTrains = L.layerGroup();
@@ -428,6 +468,7 @@ ctaPlot();
       amtraks.clearLayers();
       martas.clearLayers();
       mbtas.clearLayers();
+      rtds.clearLayers();
       ctaTrains.clearLayers();
       var startRadius = 400
       var startRadius2 = 600
@@ -453,6 +494,7 @@ ctaPlot();
       amtraks.clearLayers();
       martas.clearLayers();
       mbtas.clearLayers();
+      rtds.clearLayers();
       ctaTrains.clearLayers();
       plot();
       busPlot();

@@ -1,0 +1,16 @@
+[Unit]
+Description=Denver Data Pull
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart=/var/www/html/lametro/venv/bin/python3 /var/www/html/lametro/denver.py
+StandardOutput=/var/www/html/lametro/denver.log
+StandardError=/var/www/html/lametro/denver_error.log
+
+[Install]
+WantedBy=multi-user.target

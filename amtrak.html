@@ -39,8 +39,14 @@
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
       }).addTo(map);
       var trains = L.layerGroup();
+      var ctas = L.layerGroup();
       var martas = L.layerGroup();
       var mbtas = L.layerGroup();
+      var metroNorths = L.layerGroup();
+      var miamis = L.layerGroup();
+      var wmatas = L.layerGroup();
+      var stls = L.layerGroup();
+      var seattles = L.layerGroup();
       var rtds = L.layerGroup();
       var stops = L.layerGroup();
       var buses = L.layerGroup();
@@ -229,8 +235,28 @@ function martaPlot(){
   mbtaHTTP.send( null );
   mbtacase = mbtaHTTP.responseText.toString()
   mbtacase = JSON.parse(mbtacase)
+  var metroNorthHTTP = new XMLHttpRequest;
+  metroNorthHTTP.open("GET", 'metronorth.json', false);
+  metroNorthHTTP.send( null );
+  metroNorthcase = metroNorthHTTP.responseText.toString();
+  metroNorthcase = JSON.parse(metroNorthcase);
+  var wmataHTTP = new XMLHttpRequest;
+  wmataHTTP.open("GET", 'wmata.json', false);
+  wmataHTTP.send( null );
+  wmatacase = wmataHTTP.responseText.toString();
+  wmatacase = JSON.parse(wmatacase);
+  var miamiHTTP = new XMLHttpRequest;
+  miamiHTTP.open("GET", 'miami.json', false);
+  miamiHTTP.send( null );
+  miamicase = miamiHTTP.responseText.toString();
+  miamicase = JSON.parse(miamicase);
+  var ctaHTTP = new XMLHttpRequest;
+  ctaHTTP.open("GET", 'cta.json', false);
+  ctaHTTP.send( null );
+  ctacase = ctaHTTP.responseText.toString();
+  ctacase = JSON.parse(ctacase);
   var rtdHTTP = new XMLHttpRequest;
-  rtdHTTP.open("GET", 'rtd.json', false);
+  rtdHTTP.open("GET", 'denver.json', false);
   rtdHTTP.send( null );
   rtdcase = rtdHTTP.responseText.toString()
   rtdcase = JSON.parse(rtdcase)
@@ -239,6 +265,11 @@ function martaPlot(){
   stlHTTP.send( null );
   stlcase = stlHTTP.responseText.toString()
   stlcase = JSON.parse(stlcase)
+  var seattleHTTP = new XMLHttpRequest;
+  seattleHTTP.open("GET", 'seattle.json', false);
+  seattleHTTP.send( null );
+  seattlecase = seattleHTTP.responseText.toString()
+  seattlecase = JSON.parse(seattlecase)
   for (var martakey in martacase){
     if (martacase[martakey]['line'] == 'GOLD'){
       martaFill = 'gold';
@@ -261,13 +292,114 @@ function martaPlot(){
   }
   for (var mbtakey in mbtacase) {
     msg = mbtacase[mbtakey]['timestamp'] + '<br> Vehicle: ' + mbtacase[mbtakey]['route_id'] + ': ' + mbtacase[mbtakey]['vehicle_id'] + '<br> ' + mbtacase[mbtakey]['status'] + ': ' + mbtacase[mbtakey]['stop_id'] + '<br> ' + mbtacase[mbtakey]['speed'] + ' mph'
+    mbtaBorder = 'black'
+    if (mbtacase[mbtakey]['route_id'] == 'Mattapan'){
+      mbtaBorder = 'red'
+      mbtaFill = 'yellow';
+    }
+    else if (mbtacase[mbtakey]['route_id'].includes('Green')){
+      mbtaFill = 'green';
+    }
+    else if (mbtacase[mbtakey]['route_id'].includes('CR')){
+      mbtaFill = 'purple';
+    }
+    else {
+      mbtaFill = 'black';
+    }
     var mbtatrain = L.circle([mbtacase[mbtakey]['latitude'], [mbtacase[mbtakey]['longitude']]], lamRadius, {
                             color: 'black',
                             fillColor: 'green',
                             fillOpacity: 0.8
                     }).bindPopup(msg).addTo(mbtas);
   }
-  for (var rtdkey in rtdcase) {
+  for (var metroNorthKey in metroNorthcase) {
+    msg = metroNorthcase[metroNorthKey]['timestamp'] + '<br> Vehicle: ' + metroNorthcase[metroNorthKey]['route_id'] + '<br> ' + metroNorthcase[metroNorthKey]['status'] + ': ' + metroNorthcase[metroNorthKey]['stop_id'] + '<br> Current speed: ' + metroNorthcase[metroNorthKey]['speed']
+    var metroNorthTrain = L.circle([metroNorthcase[metroNorthKey]['latitude'], [metroNorthcase[metroNorthKey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: metroNorthcase[metroNorthKey]['color'],
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(metroNorths);
+  }
+  for (var wmataKey in wmatacase) {
+    msg = wmatacase[wmataKey]['timestamp'] + '<br> Vehicle: ' + wmatacase[wmataKey]['vehicle_id'] + '<br> ' + wmatacase[wmataKey]['status'] + ': ' + wmatacase[wmataKey]['stop_id'] + '<br> Current speed: ' + wmatacase[wmataKey]['speed']
+    var wmataTrain = L.circle([wmatacase[wmataKey]['latitude'], [wmatacase[wmataKey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: wmatacase[wmataKey]['route_id'],
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(wmatas);
+  }
+  for (var stlKey in stlcase) {
+    msg = stlcase[stlKey]['timestamp'] + '<br> Vehicle: ' + stlcase[stlKey]['vehicle_id'] + ': ' + stlcase[stlKey]['route_name'] + '<br> ' + stlcase[stlKey]['stop_id']
+    var stlTrain = L.circle([stlcase[stlKey]['latitude'], [stlcase[stlKey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: 'red',
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(stls);
+  }
+  for (var seattleKey in seattlecase) {
+    msg = seattlecase[seattleKey]['timestamp'] + '<br> Vehicle: ' + seattlecase[seattleKey]['vehicle_id'] + ': ' + seattlecase[seattleKey]['route_name'] + '<br> ' + seattlecase[seattleKey]['stop_id']
+    var seattleTrain = L.circle([seattlecase[seattleKey]['latitude'], [seattlecase[seattleKey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: 'blue',
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(seattles);
+  }
+  for (var miamiKey in miamicase) {
+    msg = miamicase[miamiKey]['timestamp'] + '<br> Vehicle: ' + miamicase[miamiKey]['vehicle_id'] + ': ' + miamicase[miamiKey]['route_name'] + '<br> ' + miamicase[miamiKey]['stop_id']
+    var miamiTrain = L.circle([miamicase[miamiKey]['latitude'], [miamicase[miamiKey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: 'blue',
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(miamis);
+  }
+  for (var ctaKey in ctacase) {
+    console.log(ctacase[ctaKey]);
+  }
+  /*for (var ctaKey in ctacase) {
+    msg = ctacase[ctaKey]['prdt'] + '<br> Vehicle: ' + ctacase[ctaKey]['destNm'] + ': ' + ctacase[ctaKey]['rn'] + '<br> ' + ctacase[ctaKey]['nextStaNm']
+    var ctaTrain = L.circle([ctacase[ctaKey]['lat'], [ctacase[ctaKey]['lon']]], lamRadius, {
+                            color: 'black',
+                            fillColor: 'red',
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(ctas);
+  }*/
+  for (var rtdKey in rtdcase) {
+    msg = rtdcase[rtdKey]['timestamp'] + '<br> Route: ' + rtdcase[rtdKey]['route_id'] + ': ' + rtdcase[rtdKey]['route_name'] + '<br> ' + rtdcase[rtdKey]['stop_id']
+    rtdColor = 'blue'
+    if (rtdcase[rtdKey]['route_id'] == 'A'){
+      rtdColor = '#56c1e9'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('B')){
+      rtdColor = '#33F343'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('D')){
+      rtdColor = '#008348'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('W')){
+      rtdColor = '#009daa'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('G')){
+      rtdColor = 'gold'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('H')){
+      rtdColor = '#0475be'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('L')){
+      rtdColor = '#ffce00'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('N')){
+      rtdColor = '#9f25b5'
+    }
+    if (rtdcase[rtdKey]['route_id'].includes('R')){
+      rtdColor = '#c4d600'
+    }
+    var rtdTrain = L.circle([rtdcase[rtdKey]['latitude'], [rtdcase[rtdKey]['longitude']]], lamRadius, {
+                            color: 'black',
+                            fillColor: rtdColor,
+                            fillOpacity: 0.8
+                    }).bindPopup(msg).addTo(rtds);
+  }
+  /*for (var rtdkey in rtdcase) {
     if (rtdcase[rtdkey]['route_id'].includes('A')){
       rtdFill = 'blue';
     }
@@ -294,13 +426,20 @@ function martaPlot(){
                             fillColor: stlFill,
                             fillOpacity: 0.8
                     }).bindPopup(msg).addTo(rtds);
-  }       
+  }*/       
   martas.addTo(map);
   mbtas.addTo(map);
+  metroNorths.addTo(map);
+  wmatas.addTo(map);
+  stls.addTo(map);
+  seattles.addTo(map);
+  miamis.addTo(map);
+  ctas.addTo(map);
   rtds.addTo(map);
+  /*rtds.addTo(map);*/
   }
 martaPlot();
-var ctaTrains = L.layerGroup();
+/*var ctaTrains = L.layerGroup();
 var ctaBuses = L.layerGroup();
 var ctaStops = L.layerGroup();
       
@@ -322,7 +461,7 @@ function ctaPlot()
                         $(data).each(function(index,value){
                             /*mymap.eachLayer(function(layer){
                               console.log(layer);*/
-                            if (value.vehicle.trip.route_id == 'UP-NW'){
+                            /*if (value.vehicle.trip.route_id == 'UP-NW'){
                                 var routeColor = '#803d0a'
                             }
                             else if (value.vehicle.trip.route_id == 'UP-N'){
@@ -371,9 +510,9 @@ function ctaPlot()
 		                    fillColor: routeColor,
 		                    fillOpacity: 0.5
 	                    }).addTo(mymap).bindPopup("Vehicle " + value.id);*/
-                        });
+                        /*});
                         /*console.log(trains);*/
-                        ctaTrains.addTo(map);
+                        /*ctaTrains.addTo(map);
 
                         }
                     );
@@ -455,7 +594,7 @@ function ctaPlot()
       }
   
 }
-ctaPlot();
+/*ctaPlot();*/
     map.on('zoomend', function(){
       var currentZoom = map.getZoom();
       console.log(currentZoom);
@@ -468,8 +607,15 @@ ctaPlot();
       amtraks.clearLayers();
       martas.clearLayers();
       mbtas.clearLayers();
+      metroNorths.clearLayers();
+      miamis.clearLayers();
+      wmatas.clearLayers();
+      stls.clearLayers();
+      ctas.clearLayers();
       rtds.clearLayers();
-      ctaTrains.clearLayers();
+      seattles.clearLayers();
+      /*rtds.clearLayers();
+      ctaTrains.clearLayers();*/
       var startRadius = 400
       var startRadius2 = 600
       var startBusRadius = 300
@@ -486,7 +632,7 @@ ctaPlot();
       busPlot();
       amtrakPlot();
       martaPlot();
-      ctaPlot();
+      /*ctaPlot();*/
     })
     setInterval(function(){
       trains.clearLayers();
@@ -494,13 +640,20 @@ ctaPlot();
       amtraks.clearLayers();
       martas.clearLayers();
       mbtas.clearLayers();
+      metroNorths.clearLayers();
+      miamis.clearLayers();
+      wmatas.clearLayers();
+      ctas.clearLayers();
       rtds.clearLayers();
-      ctaTrains.clearLayers();
+      stls.clearLayers();
+      seattles.clearLayers();
+      /*rtds.clearLayers();
+      ctaTrains.clearLayers();*/
       plot();
       busPlot();
       amtrakPlot();
       martaPlot();
-      ctaPlot();
+      /*ctaPlot();*/
     },30000);
       L.control.scale().addTo(map);
     </script>
